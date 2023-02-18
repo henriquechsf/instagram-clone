@@ -10,8 +10,11 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import tech.henriquedev.instagramclone.ui.theme.InstagramCloneTheme
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,7 +23,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background) {
-                    Greeting("Android")
+                    InstagramApp()
                 }
             }
         }
@@ -28,14 +31,15 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+fun InstagramApp() {
+    val vm = hiltViewModel<IgViewModel>()
+    val i = 0
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     InstagramCloneTheme {
-        Greeting("Android")
+        InstagramApp()
     }
 }
