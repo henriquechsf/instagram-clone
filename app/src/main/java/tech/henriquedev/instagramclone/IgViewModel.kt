@@ -26,7 +26,7 @@ class IgViewModel @Inject constructor(
     val popupNotification = mutableStateOf<Event<String>?>(null)
 
     init {
-        auth.signOut()
+        //auth.signOut()
 
         val currentUser = auth.currentUser
         signedIn.value = currentUser != null
