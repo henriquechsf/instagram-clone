@@ -73,7 +73,13 @@ fun SignUpScreen(navController: NavController, vm: IgViewModel) {
             )
 
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {
+                          vm.onSignUp(
+                              username = usernameState.value.text,
+                              email = emailState.value.text,
+                              pass = passState.value.text
+                          )
+                },
                 modifier = Modifier.padding(8.dp)
             ) {
                 Text(text = "Sign Up")

@@ -1,0 +1,10 @@
+SignUp requirements
+
+[] check that username is unique
+[] create a user [] subject to Firebase Auth verification
+[] create a profile in Firestore
+[] retrieve user data and store it in ViewModel
+[] inProgress flag and display a spinner
+[] handle any error messages that might occur
+[] on app startup, check if user is logged in
+[] if the user is logged in, move to main app screen
