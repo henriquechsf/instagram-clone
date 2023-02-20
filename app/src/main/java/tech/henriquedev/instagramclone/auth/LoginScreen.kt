@@ -75,6 +75,10 @@ fun LoginScreen(navController: NavController, vm: IgViewModel) {
             Button(
                 onClick = {
                     focus.clearFocus(force = true)
+                    vm.onLogin(
+                        email = emailState.value.text,
+                        pass = passState.value.text
+                    )
                 },
                 modifier = Modifier.padding(8.dp)
             ) {
