@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import tech.henriquedev.instagramclone.IgViewModel
 import tech.henriquedev.instagramclone.R
+import tech.henriquedev.instagramclone.main.CommonProgressSpinner
 
 @Composable
 fun SignUpScreen(navController: NavController, vm: IgViewModel) {
@@ -90,9 +91,14 @@ fun SignUpScreen(navController: NavController, vm: IgViewModel) {
                 color = Color.Blue,
                 modifier = Modifier
                     .padding(8.dp)
-                    .clickable {  }
+                    .clickable { }
             )
 
+        }
+
+        val isLoading = vm.inProgress.value
+        if (isLoading) {
+            CommonProgressSpinner()
         }
     }
 }
