@@ -18,7 +18,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import tech.henriquedev.instagramclone.auth.LoginScreen
 import tech.henriquedev.instagramclone.auth.SignUpScreen
 import tech.henriquedev.instagramclone.main.FeedScreen
+import tech.henriquedev.instagramclone.main.MyPostsScreen
 import tech.henriquedev.instagramclone.main.NotificationMessage
+import tech.henriquedev.instagramclone.main.SearchScreen
 import tech.henriquedev.instagramclone.ui.theme.InstagramCloneTheme
 
 @AndroidEntryPoint
@@ -41,6 +43,8 @@ sealed class DestinationScreen(val route: String) {
     object SignUp: DestinationScreen("signup")
     object Login: DestinationScreen("login")
     object Feed: DestinationScreen("feed")
+    object Search: DestinationScreen("search")
+    object MyPosts: DestinationScreen("myposts")
 }
 
 @Composable
@@ -59,6 +63,12 @@ fun InstagramApp() {
         }
         composable(DestinationScreen.Feed.route) {
             FeedScreen(navController = navController, vm = vm)
+        }
+        composable(DestinationScreen.Search.route) {
+            SearchScreen(navController = navController, vm = vm)
+        }
+        composable(DestinationScreen.MyPosts.route) {
+            MyPostsScreen(navController = navController, vm = vm)
         }
     }
 }
