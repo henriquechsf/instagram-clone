@@ -1,5 +1,8 @@
 package tech.henriquedev.instagramclone.main
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,6 +31,16 @@ import tech.henriquedev.instagramclone.R
 @Composable
 fun MyPostsScreen(navController: NavController, vm: IgViewModel) {
 
+    val newPostImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            val encoded = Uri.encode(it.toString())
+            val route = DestinationScreen.NewPost.createRoute(encoded)
+            navController.navigate(route)
+        }
+    }
+
     val userData = vm.userData.value
     val isLoading = vm.inProgress.value
 
@@ -35,7 +48,7 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel) {
         Column(modifier = Modifier.weight(1f)) {
             Row {
                 ProfileImage(userData?.imageUrl) {
-                    
+                    newPostImageLauncher.launch("image/*")
                 }
                 Text(
                     text = "54\nfollowers",
@@ -59,9 +72,10 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel) {
                     textAlign = TextAlign.Center
                 )
             }
-            
+
             Column(modifier = Modifier.padding(8.dp)) {
-                val usernameDisplay = if (userData?.username == null) "" else "@${userData?.username}"
+                val usernameDisplay =
+                    if (userData?.username == null) "" else "@${userData?.username}"
 
                 Text(text = userData?.name ?: "", fontWeight = FontWeight.Bold)
                 Text(text = usernameDisplay)
@@ -83,12 +97,12 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel) {
             ) {
                 Text(text = "Edit Profile", color = Color.Black)
             }
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = "Posts list")
             }
         }
-        
+
         BottomNavigationMenu(
             selectedItem = BottomNavigationItem.POSTS,
             navController = navController
@@ -111,7 +125,7 @@ fun ProfileImage(imageUrl: String?, onClick: () -> Unit) {
                 .padding(8.dp)
                 .size(80.dp)
         )
-        
+
         Card(
             shape = CircleShape,
             border = BorderStroke(width = 2.dp, color = Color.White),
