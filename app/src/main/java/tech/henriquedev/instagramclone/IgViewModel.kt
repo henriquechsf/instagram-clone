@@ -26,7 +26,7 @@ class IgViewModel @Inject constructor(
     val popupNotification = mutableStateOf<Event<String>?>(null)
 
     init {
-        auth.signOut()
+        //auth.signOut()
 
         val currentUser = auth.currentUser
         signedIn.value = currentUser != null
@@ -89,6 +89,10 @@ class IgViewModel @Inject constructor(
                 handleException(exception, "Login failed")
                 inProgress.value = false
             }
+    }
+
+    fun updateProfileData(name: String, username: String, bio: String) {
+        createOrUpdateProfile(name, username, bio)
     }
 
     private fun createOrUpdateProfile(
