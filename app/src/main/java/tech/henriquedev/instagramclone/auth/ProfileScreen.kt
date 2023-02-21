@@ -2,7 +2,6 @@ package tech.henriquedev.instagramclone.auth
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,9 +12,9 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +48,10 @@ fun ProfileScreen(navController: NavController, vm: IgViewModel) {
             onBioChange = { bio = it },
             onSave = { vm.updateProfileData(name, username, bio) },
             onBack = { navigateTo(navController, DestinationScreen.MyPosts) },
-            onLogout = { })
+            onLogout = {
+                vm.onLogout()
+                navigateTo(navController, DestinationScreen.Login)
+            })
     }
 }
 
@@ -139,9 +141,10 @@ fun ProfileContent(
 fun ProfileImage(imageUrl: String?, vm: IgViewModel) {
 
     // get images from device and update profile
-    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { vm.uploadProfileImage(uri) }
-    }
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+            uri?.let { vm.uploadProfileImage(uri) }
+        }
 
     Box(modifier = Modifier.height(IntrinsicSize.Min)) {
 
