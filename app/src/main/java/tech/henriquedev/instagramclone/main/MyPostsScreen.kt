@@ -8,6 +8,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
@@ -19,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +30,24 @@ import androidx.navigation.NavController
 import tech.henriquedev.instagramclone.DestinationScreen
 import tech.henriquedev.instagramclone.IgViewModel
 import tech.henriquedev.instagramclone.R
+import tech.henriquedev.instagramclone.data.PostData
+
+data class PostRow(
+    var post1: PostData? = null,
+    var post2: PostData? = null,
+    var post3: PostData? = null,
+) {
+    fun isFull() = post1 != null && post2 != null && post3 != null
+    fun add(post: PostData) {
+        if (post1 == null) {
+            post1 = post
+        } else if (post2 == null) {
+            post2 = post
+        } else if (post3 == null) {
+            post3 = post
+        }
+    }
+}
 
 @Composable
 fun MyPostsScreen(navController: NavController, vm: IgViewModel) {
@@ -43,6 +64,9 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel) {
 
     val userData = vm.userData.value
     val isLoading = vm.inProgress.value
+
+    val postsLoading = vm.refreshPostsProgress.value
+    val posts = vm.posts.value
 
     Column {
         Column(modifier = Modifier.weight(1f)) {
@@ -98,8 +122,15 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel) {
                 Text(text = "Edit Profile", color = Color.Black)
             }
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = "Posts list")
+            PostList(isContextLoading = isLoading,
+                postsLoading = postsLoading,
+                posts = posts,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(1.dp)
+                    .fillMaxSize()) {
+                // On post click
+
             }
         }
 
@@ -142,5 +173,81 @@ fun ProfileImage(imageUrl: String?, onClick: () -> Unit) {
                     .background(Color.Blue)
             )
         }
+    }
+}
+
+@Composable
+fun PostList(
+    isContextLoading: Boolean,
+    postsLoading: Boolean,
+    posts: List<PostData>,
+    modifier: Modifier,
+    onPostClick: (PostData) -> Unit,
+) {
+
+    // TODO: Workaround, verify best implementation here
+    if (postsLoading) {
+        CommonProgressSpinner()
+    } else if (posts.isEmpty()) {
+        Column(modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {
+
+            if (!isContextLoading) Text(text = "No posts available")
+        }
+    } else {
+        LazyColumn(modifier = modifier) {
+            val rows = arrayListOf<PostRow>()
+            var currentRow = PostRow()
+            rows.add(currentRow)
+
+            for (post in posts) {
+                if (currentRow.isFull()) {
+                    currentRow = PostRow()
+                    rows.add(currentRow)
+                }
+                currentRow.add(post)
+            }
+
+            items(items = rows) { row ->
+                PostsRow(item = row, onPostClick = onPostClick)
+            }
+        }
+    }
+}
+
+@Composable
+fun PostsRow(item: PostRow, onPostClick: (PostData) -> Unit) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .height(120.dp)) {
+
+        PostImage(imageUrl = item.post1?.postImage, modifier = Modifier
+            .weight(1f)
+            .clickable { item.post1?.let { post -> onPostClick(post) } }
+        )
+        PostImage(imageUrl = item.post2?.postImage, modifier = Modifier
+            .weight(1f)
+            .clickable { item.post2?.let { post -> onPostClick(post) } }
+        )
+        PostImage(imageUrl = item.post3?.postImage, modifier = Modifier
+            .weight(1f)
+            .clickable { item.post3?.let { post -> onPostClick(post) } }
+        )
+    }
+}
+
+@Composable
+fun PostImage(imageUrl: String?, modifier: Modifier) {
+    Box(modifier = modifier) {
+        var modifier = Modifier
+            .padding(1.dp)
+            .fillMaxSize()
+
+        if (imageUrl == null) {
+            modifier = Modifier.clickable(enabled = false) { }
+        }
+
+        CommonImage(data = imageUrl, modifier = modifier, contentScale = ContentScale.Crop)
     }
 }
