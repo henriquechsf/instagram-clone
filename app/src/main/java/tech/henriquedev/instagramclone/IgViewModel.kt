@@ -1,5 +1,6 @@
 package tech.henriquedev.instagramclone
 
+import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -9,6 +10,7 @@ import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import tech.henriquedev.instagramclone.data.Event
 import tech.henriquedev.instagramclone.data.UserData
+import java.util.UUID
 import javax.inject.Inject
 
 const val USERS = "users"
@@ -95,6 +97,12 @@ class IgViewModel @Inject constructor(
         createOrUpdateProfile(name, username, bio)
     }
 
+    fun uploadProfileImage(uri: Uri) {
+        uploadImage(uri) {
+            createOrUpdateProfile(imageUrl = it.toString())
+        }
+    }
+
     private fun createOrUpdateProfile(
         name: String? = null,
         username: String? = null,
@@ -150,6 +158,25 @@ class IgViewModel @Inject constructor(
             }
             .addOnFailureListener { exception ->
                 handleException(exception, "Cannot retrieve user data")
+                inProgress.value = false
+            }
+    }
+
+    private fun uploadImage(uri: Uri, onSuccess: (Uri) -> Unit) {
+        inProgress.value = true
+
+        val storageRef = storage.reference
+        val uuid = UUID.randomUUID()
+        val imageRef = storageRef.child("images/$uuid")
+        val uploadTask = imageRef.putFile(uri)
+
+        uploadTask
+            .addOnSuccessListener {
+                val result = it.metadata?.reference?.downloadUrl
+                result?.addOnSuccessListener(onSuccess)
+            }
+            .addOnFailureListener { exception ->
+                handleException(exception)
                 inProgress.value = false
             }
     }

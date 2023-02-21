@@ -1,10 +1,14 @@
 package tech.henriquedev.instagramclone.auth
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -21,6 +25,7 @@ import androidx.navigation.NavController
 import tech.henriquedev.instagramclone.DestinationScreen
 import tech.henriquedev.instagramclone.IgViewModel
 import tech.henriquedev.instagramclone.main.CommonDivider
+import tech.henriquedev.instagramclone.main.CommonImage
 import tech.henriquedev.instagramclone.main.CommonProgressSpinner
 import tech.henriquedev.instagramclone.main.navigateTo
 
@@ -62,6 +67,7 @@ fun ProfileContent(
     onLogout: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
+    val imageUrl = vm.userData.value?.imageUrl
 
     Column(modifier = Modifier
         .verticalScroll(scrollState)
@@ -76,13 +82,7 @@ fun ProfileContent(
 
         CommonDivider()
 
-        // User image
-        Column(modifier = Modifier
-            .height(200.dp)
-            .fillMaxWidth()
-            .background(Color.Gray)) {
-
-        }
+        ProfileImage(imageUrl = imageUrl, vm = vm)
 
         CommonDivider()
 
@@ -132,5 +132,34 @@ fun ProfileContent(
 
             Text(text = "Logout", modifier = Modifier.clickable { onLogout.invoke() })
         }
+    }
+}
+
+@Composable
+fun ProfileImage(imageUrl: String?, vm: IgViewModel) {
+
+    // get images from device and update profile
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { vm.uploadProfileImage(uri) }
+    }
+
+    Box(modifier = Modifier.height(IntrinsicSize.Min)) {
+
+        Column(modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .clickable { launcher.launch("image/*") },
+            horizontalAlignment = Alignment.CenterHorizontally) {
+
+            Card(shape = CircleShape, modifier = Modifier
+                .padding(8.dp)
+                .size(100.dp)) {
+                CommonImage(data = imageUrl)
+            }
+            Text(text = "Change profile picture")
+        }
+
+        val isLoading = vm.inProgress.value
+        if (isLoading) CommonProgressSpinner()
     }
 }
