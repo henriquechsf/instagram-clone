@@ -107,6 +107,7 @@ class IgViewModel @Inject constructor(
         signedIn.value = false
         userData.value = null
         popupNotification.value = Event("Logged Out")
+        searchedPosts.value = listOf()
     }
 
     fun updateProfileData(name: String, username: String, bio: String) {
@@ -342,4 +343,25 @@ class IgViewModel @Inject constructor(
         }
     }
 
+    // FOLLOW
+    fun onFollowClick(userId: String) {
+        auth.currentUser?.uid?.let { currentUser ->
+           var following = arrayListOf<String>()
+
+            userData.value?.following?.let {
+               following.addAll(it)
+           }
+
+            if (following.contains(userId)) {
+                following.remove(userId)
+            } else {
+                following.add(userId)
+            }
+
+            db.collection(USERS).document(currentUser).update("following", following)
+                .addOnSuccessListener {
+                    getUserData(currentUser)
+                }
+        }
+    }
 }
