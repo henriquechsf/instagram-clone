@@ -18,6 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import tech.henriquedev.instagramclone.auth.LoginScreen
 import tech.henriquedev.instagramclone.auth.ProfileScreen
 import tech.henriquedev.instagramclone.auth.SignUpScreen
+import tech.henriquedev.instagramclone.data.PostData
 import tech.henriquedev.instagramclone.main.*
 import tech.henriquedev.instagramclone.ui.theme.InstagramCloneTheme
 
@@ -38,22 +39,24 @@ class MainActivity : ComponentActivity() {
 }
 
 sealed class DestinationScreen(val route: String) {
-    object SignUp: DestinationScreen("signup")
-    object Login: DestinationScreen("login")
-    object Feed: DestinationScreen("feed")
-    object Search: DestinationScreen("search")
-    object MyPosts: DestinationScreen("myposts")
-    object Profile: DestinationScreen("profile")
-    object NewPost: DestinationScreen("newpost/{imageUri}") {
+    object SignUp : DestinationScreen("signup")
+    object Login : DestinationScreen("login")
+    object Feed : DestinationScreen("feed")
+    object Search : DestinationScreen("search")
+    object MyPosts : DestinationScreen("myposts")
+    object Profile : DestinationScreen("profile")
+    object NewPost : DestinationScreen("newpost/{imageUri}") {
         fun createRoute(uri: String) = "newpost/$uri"
     }
+
+    object SinglePost : DestinationScreen("singlepost")
 }
 
 @Composable
 fun InstagramApp() {
     val vm = hiltViewModel<IgViewModel>()
     val navController = rememberNavController()
-    
+
     NotificationMessage(vm = vm)
 
     NavHost(navController = navController, startDestination = DestinationScreen.SignUp.route) {
@@ -80,6 +83,12 @@ fun InstagramApp() {
             imageUri?.let {
                 NewPostScreen(navController = navController, vm = vm, encodedUri = it)
             }
+        }
+        composable(DestinationScreen.SinglePost.route) {
+            val postData =
+                navController.previousBackStackEntry?.arguments?.getParcelable<PostData>("post")
+            
+            postData?.let { SinglePostScreen(navController = navController, vm = vm, post = postData) }
         }
     }
 }
