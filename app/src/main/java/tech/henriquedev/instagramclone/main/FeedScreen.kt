@@ -1,7 +1,10 @@
 package tech.henriquedev.instagramclone.main
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,13 +14,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import tech.henriquedev.instagramclone.DestinationScreen
 import tech.henriquedev.instagramclone.IgViewModel
 import tech.henriquedev.instagramclone.data.PostData
@@ -88,14 +98,34 @@ fun PostsList(
 }
 
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun Post(post: PostData, currentUserId: String, vm: IgViewModel, onPostClick: () -> Unit) {
+
+    val likeAnimation = remember { mutableStateOf(false) }
+    val dislikeAnimation = remember { mutableStateOf(false) }
+
     Card(shape = RoundedCornerShape(corner = CornerSize(4.dp)),
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .height(200.dp)
-            .padding(top = 4.dp, bottom = 4.dp)) {
+            .padding(top = 4.dp, bottom = 4.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        if (post.likes?.contains(currentUserId) == true) {
+                            dislikeAnimation.value = true
+                        } else {
+                            likeAnimation.value = true
+                        }
+
+                        vm.onLikePost(post)
+                    }, onTap = {
+                        onPostClick.invoke()
+                    })
+            }
+    ) {
 
         Column {
             Row(modifier = Modifier
@@ -117,11 +147,27 @@ fun Post(post: PostData, currentUserId: String, vm: IgViewModel, onPostClick: ()
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 150.dp)
 
+
                 CommonImage(
                     data = post.postImage,
                     modifier = modifier,
                     contentScale = ContentScale.FillWidth
                 )
+
+                if (likeAnimation.value) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        delay(1000L)
+                        likeAnimation.value = false
+                    }
+                    LikeAnimation()
+                }
+                if (dislikeAnimation.value) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        delay(1000L)
+                        dislikeAnimation.value = false
+                    }
+                    LikeAnimation(like = false)
+                }
             }
         }
     }
