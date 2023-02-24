@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +25,13 @@ import tech.henriquedev.instagramclone.data.PostData
 
 @Composable
 fun SinglePostScreen(navController: NavController, vm: IgViewModel, post: PostData) {
+
+    val comments = vm.comments.value
+
+    LaunchedEffect(key1 = Unit) {
+        vm.getComments(post.postId)
+    }
+
     post.userId?.let {
         Column(modifier = Modifier
             .fillMaxWidth()
@@ -32,13 +40,18 @@ fun SinglePostScreen(navController: NavController, vm: IgViewModel, post: PostDa
 
             Text(text = "Back", modifier = Modifier.clickable { navController.popBackStack() })
             CommonDivider()
-            SinglePostDisplay(navController = navController, vm = vm, post = post)
+            SinglePostDisplay(navController = navController, vm = vm, post = post, comments.size)
         }
     }
 }
 
 @Composable
-fun SinglePostDisplay(navController: NavController, vm: IgViewModel, post: PostData) {
+fun SinglePostDisplay(
+    navController: NavController,
+    vm: IgViewModel,
+    post: PostData,
+    numberComments: Int,
+) {
     val userData = vm.userData.value
 
     Box(modifier = Modifier
@@ -95,7 +108,7 @@ fun SinglePostDisplay(navController: NavController, vm: IgViewModel, post: PostD
     }
 
     Row(modifier = Modifier.padding(8.dp)) {
-        Text(text = "10 comments",
+        Text(text = "$numberComments comments",
             color = Color.Gray,
             modifier = Modifier
                 .padding(start = 8.dp)
