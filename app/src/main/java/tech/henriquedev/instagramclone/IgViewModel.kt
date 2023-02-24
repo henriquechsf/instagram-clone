@@ -11,6 +11,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import tech.henriquedev.instagramclone.data.CommentData
 import tech.henriquedev.instagramclone.data.Event
 import tech.henriquedev.instagramclone.data.PostData
 import tech.henriquedev.instagramclone.data.UserData
@@ -19,6 +20,7 @@ import javax.inject.Inject
 
 const val USERS = "users"
 const val POSTS = "posts"
+const val COMMENTS = "comments"
 
 @HiltViewModel
 class IgViewModel @Inject constructor(
@@ -40,6 +42,9 @@ class IgViewModel @Inject constructor(
 
     val postsFeed = mutableStateOf<List<PostData>>(listOf())
     val postsFeedProgress = mutableStateOf(false)
+
+    val comments = mutableStateOf<List<CommentData>>(listOf())
+    val commentsProgress = mutableStateOf(false)
 
     init {
         val currentUser = auth.currentUser
@@ -112,6 +117,7 @@ class IgViewModel @Inject constructor(
         popupNotification.value = Event("Logged Out")
         searchedPosts.value = listOf()
         postsFeed.value = listOf()
+        comments.value = listOf()
     }
 
     fun updateProfileData(name: String, username: String, bio: String) {
@@ -435,6 +441,29 @@ class IgViewModel @Inject constructor(
                         }
                 }
             }
+        }
+    }
+
+    // COMMENTS
+    fun createComment(postId: String, text: String) {
+        userData.value?.username?.let { username ->
+            val commentId = UUID.randomUUID().toString()
+
+            val comment = CommentData(
+                commentId = commentId,
+                postId = postId,
+                username = username,
+                text = text,
+                timestamp = System.currentTimeMillis()
+            )
+
+            db.collection(COMMENTS).document(commentId).set(comment)
+                .addOnSuccessListener {
+                    // get existing comment
+                }
+                .addOnFailureListener { exception ->
+                    handleException(exception, "Cannot create comment")
+                }
         }
     }
 
